@@ -7,30 +7,71 @@ import sys
 import os
 from random import randint
 
-# Nettoyage des données
+# Data cleansing
 filename = ""
-if (len(sys.argv) != 1) :
+if (len(sys.argv) != 1):
     if os.path.isfile(sys.argv[1]):
         filename = sys.argv[1]
-else :
-    filename = "data/preferences.csv"   ## default preference file location
+else:
+    filename = "data/RandomPreferences_50.csv"  ## default preference file location
 
 preferences = pd.read_csv(filename)
 
-preferences.drop("Horodateur", axis=1, inplace = True)
+if ("Horodateur" in preferences.columns):
+    preferences.drop("Horodateur", axis=1, inplace=True)
+
 preferences["Index"] = range(preferences.index.size)
 preferences.set_index("Index", inplace=True)
-# preferences["Matricule"].apply(lambda x : str(x).split("000")[-1])
 
-# Brouillon : ajout d'un nombre N d'étudiants dans le fichier de préférences, génération aléatoire !
-N = 50
-print(preferences.columns)
-for i in range(1,N) :
-    randomMatricule = randint(450000, 520000)
-    index = i
-    randomPreferences = [randint(1,10) for x in range(12)]
-    toAppend = [randomMatricule] + randomPreferences
-    preferences.loc[i] = toAppend
+# Building the preferences array from the dataset
+preferencesArray = np.array(preferences[preferences.columns[1:]].astype("Int64"))  # row "i" is for the "i"th student
+n_students = preferencesArray.shape[0]
 
-preferences.to_csv("data/RandomPreferences.csv")
+# Building the schedule and its maximum number of students
+formatSession_df = pd.read_csv("data/formatSession.csv", index_col="Créneau")
+formatSessionArray = np.array(formatSession_df["Nombre d'étudiants"].astype("Int64"))
+n_slots = formatSessionArray.size
+n_total_slots = formatSessionArray.sum()
 
+# ------------------- MEET GLPK ----------------------
+
+# Problem
+problem = LpProblem("Problem", sense = LpMaximize)
+
+
+# Variables
+x_ij = [
+    [LpVariable("x_{}_{}".format(i, j), cat=LpBinary)
+     for j in range(n_slots)]
+    for i in range(n_students)
+]
+
+# Constraints
+# 1 : Number of students for slot j is not bigger than the max number of students allowed for slot j
+for j in range(n_slots) :
+    number_of_students_slot_j = 0
+    for student in range(n_students) :
+        number_of_students_slot_j += x_ij[student][j]
+
+    problem += (number_of_students_slot_j <= formatSessionArray[j], "MaxStudents_{}".format(j))
+
+# 2 A student is given exactly 1 slot
+for i in range(n_students) :
+    n_slots_given_for_student_i = 0
+    for slot in range(n_slots) :
+        n_slots_given_for_student_i += x_ij[i][slot]
+
+    problem += (n_slots_given_for_student_i == 1, "OneSlot_{}".format(i))
+
+# Economic function
+preferences_sum = (preferencesArray.sum(axis = 1))
+normalized_preferences = preferencesArray*10/ preferences_sum[:,np.newaxis]
+
+cost = 0
+for i in range(n_students) :
+    for j in range(n_slots) :
+        cost += x_ij[i][j]*normalized_preferences[i][j]
+
+problem += cost, 'Objective Function'
+
+problem.solve(solver=GLPK(msg=True, keepFiles=True, timeLimit=30))
