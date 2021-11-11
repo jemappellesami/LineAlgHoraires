@@ -33,6 +33,7 @@ formatSessionArray = np.array(formatSession_df["Nombre d'étudiants"].astype("In
 n_slots = formatSessionArray.size
 n_total_slots = formatSessionArray.sum()
 
+
 # ------------------- MEET GLPK ----------------------
 
 # Problem
@@ -74,4 +75,48 @@ for i in range(n_students) :
 
 problem += cost, 'Objective Function'
 
-problem.solve(solver=GLPK(msg=True, keepFiles=True, timeLimit=30))
+solution = problem.solve(solver=GLPK(msg=True, keepFiles=True, timeLimit=30))
+
+
+
+## Problem solution analysis
+# matching of student ID and location in the array
+student_dict = dict()
+i = 0
+for student in preferences["Matricule"] :
+    student_dict[i] = student
+    i += 1
+
+slot_dict = dict()
+i = 0
+for slot in preferences.columns[1:] :
+    slot_dict[i] = slot
+    i += 1
+
+
+
+schedule = preferences.copy()
+
+for idx, row in schedule.iterrows():
+    student_number = idx
+    for slot in range(n_slots) :
+        real_slot = slot_dict[slot]
+        if(x_ij[student_number][slot].varValue == 1) :
+            schedule.loc[idx,real_slot] = "X"
+        else :
+            schedule.loc[idx,real_slot] = " "
+
+
+student_slot_dict = dict()
+for i in range(n_students) :
+    for j in range(n_slots) :
+        if x_ij[i][j].varValue == 1 :
+            student_slot_dict[student_dict[i]] = slot_dict[j]
+
+student_slot_df = pd.DataFrame({
+    "Matricule" : student_slot_dict.keys(),
+    "Date": student_slot_dict.values()
+})
+
+student_slot_df.to_csv("Schedule_stud_and_date.csv", index = False)
+schedule.to_csv("Schedule.csv", index = False)
