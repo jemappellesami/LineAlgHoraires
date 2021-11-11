@@ -6,7 +6,7 @@ Generate random preferences file
 Input : data/preferences.csv, resulting of a google forms
 """
 
-filename = "data/preferences.csv"
+filename = "../data/preferences.csv"
 preferences = pd.read_csv(filename)
 
 default_horodat = preferences["Horodateur"][0]
