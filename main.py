@@ -5,7 +5,6 @@ import pandas as pd
 import numpy as np
 import sys
 import os
-from random import randint
 
 # Data cleansing
 filename = ""
@@ -13,7 +12,7 @@ if (len(sys.argv) != 1):
     if os.path.isfile(sys.argv[1]):
         filename = sys.argv[1]
 else:
-    filename = "../data/ELEC-H3001-2022.csv"  ## default preference file location
+    filename = "data/ELEC-H3001-2022.csv"  ## default preference file location
 
 preferences = pd.read_csv(filename)
 
@@ -27,7 +26,7 @@ preferencesArray = np.array(preferences[preferences.columns[1:]].astype("Int64")
 n_students = preferencesArray.shape[0]
 
 # Building the schedule and its maximum number of students
-formatSession_df = pd.read_csv("../data/elech3001-2022-formatSession.csv", index_col="Créneau")
+formatSession_df = pd.read_csv("data/elech3001-2022-formatSession.csv", index_col="Créneau")
 formatSessionArray = np.array(formatSession_df["Nombre d'étudiants"].astype("Int64"))
 n_slots = formatSessionArray.size
 n_total_slots = formatSessionArray.sum()
@@ -117,5 +116,5 @@ student_slot_df = pd.DataFrame({
     "Date": student_slot_dict.values()
 })
 
-student_slot_df.to_csv("../out/Schedule_stud_and_date.csv", index = False)
-schedule.to_csv("../out/Schedule.csv", index = False)
+student_slot_df.to_csv("out/Schedule_stud_and_date.csv", index = False)
+schedule.to_csv("out/Schedule.csv", index = False)
