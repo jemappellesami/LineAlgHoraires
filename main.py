@@ -12,12 +12,14 @@ if (len(sys.argv) != 1):
     if os.path.isfile(sys.argv[1]):
         filename = sys.argv[1]
 else:
-    filename = "data/ELEC-H3001-2022.csv"  ## default preference file location
+    filename = "data/PHYS-H1001-2022.csv"  ## default preference file location
 
 preferences = pd.read_csv(filename)
 
 if ("Timestamp" in preferences.columns):
     preferences.drop("Timestamp", axis=1, inplace=True)
+elif ("Horodateur" in preferences.columns):
+    preferences.drop("Horodateur", axis=1, inplace=True)
 
 preferences["Index"] = range(preferences.index.size)
 preferences.set_index("Index", inplace=True)
@@ -26,7 +28,7 @@ preferencesArray = np.array(preferences[preferences.columns[1:]].astype("Int64")
 n_students = preferencesArray.shape[0]
 
 # Building the schedule and its maximum number of students
-formatSession_df = pd.read_csv("data/elech3001-2022-formatSession.csv", index_col="Créneau")
+formatSession_df = pd.read_csv("data/physh1001-2022-formatSession.csv", index_col="Créneau")
 formatSessionArray = np.array(formatSession_df["Nombre d'étudiants"].astype("Int64"))
 n_slots = formatSessionArray.size
 n_total_slots = formatSessionArray.sum()
