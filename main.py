@@ -1,3 +1,4 @@
+import pdfkit
 from pulp import GLPK
 from pulp import LpProblem, LpVariable
 from pulp.constants import LpBinary, LpMinimize, LpMaximize, LpInteger
@@ -120,3 +121,10 @@ student_slot_df = pd.DataFrame({
 
 student_slot_df.to_csv("out/Schedule_stud_and_date.csv", index = False)
 schedule.to_csv("out/Schedule.csv", index = False)
+
+# Display in pdf (need wkhtmltopdf)
+
+schedule.to_html("out/Schedule.html")
+pdfkit.from_file("out/Schedule.html", "out/Schedule.pdf")
+student_slot_df.to_html("out/Schedule_stud_and_date.html")
+pdfkit.from_file("out/Schedule_stud_and_date.html", "out/Schedule_stud_and_date.pdf")

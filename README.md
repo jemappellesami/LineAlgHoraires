@@ -15,3 +15,19 @@
 - Add your "preferences" and "format" files in the `data` folder and make sure the name is adapted in the code.
 
 - Run with `poetry run python main.py`
+
+## Poetry modules 
+- pandas
+- PuLP
+- numpy
+- dateutil
+- To display as html file : `pandas`
+- To convert html to pdf : `pdfkit`
+## External dependencies
+- Install GLPK (to solve the problem)
+- Install wkhtmltopdf (for display purpose)
+
+### Ubuntu/Debian
+`sudo apt-get install wkhtmltopdf glpk`
+### Arch
+`sudo pacman -S wkhtmltopdf glpk`
