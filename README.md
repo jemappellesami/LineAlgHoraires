@@ -29,5 +29,5 @@
 
 ### Ubuntu/Debian
 `sudo apt-get install wkhtmltopdf glpk`
-### Arch
+### Manjaro/Arch
 `sudo pacman -S wkhtmltopdf glpk`
