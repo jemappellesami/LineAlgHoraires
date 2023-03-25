@@ -7,20 +7,28 @@ import numpy as np
 import sys
 import os
 
+
 # Data cleansing
-filename = ""
+directory = ""
 if (len(sys.argv) != 1):
     if os.path.isfile(sys.argv[1]):
-        filename = sys.argv[1]
+        directory = sys.argv[1]
 else:
-    filename = "data/PHYS-H1001-2022.csv"  ## default preference file location
+    directory = "data/2023-CHIMH2001"  ## default preference file location
 
-preferences = pd.read_csv(filename)
+preferences_file = directory + "/preferences.csv"
+preferences = pd.read_csv(preferences_file)
 
 if ("Timestamp" in preferences.columns):
     preferences.drop("Timestamp", axis=1, inplace=True)
 elif ("Horodateur" in preferences.columns):
     preferences.drop("Horodateur", axis=1, inplace=True)
+
+if ("Nom" in preferences.columns):
+    preferences.drop("Nom", axis=1, inplace=True)
+
+if ("Prénom" in preferences.columns):
+    preferences.drop("Prénom", axis=1, inplace=True)
 
 preferences["Index"] = range(preferences.index.size)
 preferences.set_index("Index", inplace=True)
@@ -29,14 +37,14 @@ preferencesArray = np.array(preferences[preferences.columns[1:]].astype("Int64")
 n_students = preferencesArray.shape[0]
 
 # Building the schedule and its maximum number of students
-formatSession_df = pd.read_csv("data/physh1001-2022-formatSession.csv", index_col="Créneau")
+formatSession_df = pd.read_csv(f"{directory}/format.csv", index_col="Créneau")
 formatSessionArray = np.array(formatSession_df["Nombre d'étudiants"].astype("Int64"))
 n_slots = formatSessionArray.size
 n_total_slots = formatSessionArray.sum()
-
+print(n_total_slots)
 
 # ------------------- MEET GLPK ----------------------
-
+print(preferences)
 # Problem
 problem = LpProblem("Problem", sense = LpMaximize)
 
