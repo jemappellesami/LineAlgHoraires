@@ -14,7 +14,7 @@ if (len(sys.argv) != 1):
     if os.path.isfile(sys.argv[1]):
         directory = sys.argv[1]
 else:
-    directory = "data/2023-CHIMH2001"  ## default preference file location
+    directory = "data/2023-ELECH3001"  ## default preference file location
 
 preferences_file = directory + "/preferences.csv"
 preferences = pd.read_csv(preferences_file)
